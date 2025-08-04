@@ -2,10 +2,12 @@
 #include <stdbool.h>
 
 /*
- * BATALHA NAVAL - NÍVEL NOVATO
+ * BATALHA NAVAL - NÍVEL INTERMEDIÁRIO
  *
  * Este programa implementa um tabuleiro de Batalha Naval 10x10 com:
- * - 2 navios de tamanho 3 (um horizontal e um vertical)
+ * - 4 navios de tamanho 3 cada
+ * - 2 navios posicionados horizontalmente/verticalmente
+ * - 2 navios posicionados na diagonal
  * - Representação visual do tabuleiro
  * - Validação de posicionamento dos navios
  *
@@ -51,10 +53,22 @@ bool coordenadasValidas(int linha, int coluna, int orientacao)
     { // Horizontal - verifica se cabe na horizontal
         return (coluna + TAMANHO_NAVIO - 1) < TAMANHO_TABULEIRO;
     }
-    else
+    else if (orientacao == 1)
     { // Vertical - verifica se cabe na vertical
         return (linha + TAMANHO_NAVIO - 1) < TAMANHO_TABULEIRO;
     }
+    else if (orientacao == 2)
+    { // Diagonal descendente (\) - verifica se cabe na diagonal
+        return (linha + TAMANHO_NAVIO - 1) < TAMANHO_TABULEIRO && 
+               (coluna + TAMANHO_NAVIO - 1) < TAMANHO_TABULEIRO;
+    }
+    else if (orientacao == 3)
+    { // Diagonal ascendente (/) - verifica se cabe na diagonal
+        return (linha + TAMANHO_NAVIO - 1) < TAMANHO_TABULEIRO && 
+               (coluna - TAMANHO_NAVIO + 1) >= 0;
+    }
+    
+    return false; // Orientação inválida
 }
 
 // Função para verificar se há sobreposição com navios já posicionados
@@ -72,10 +86,24 @@ bool verificarSobreposicao(int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO],
             linha_verificar = linha;
             coluna_verificar = coluna + i;
         }
-        else
+        else if (orientacao == 1)
         { // Vertical
             linha_verificar = linha + i;
             coluna_verificar = coluna;
+        }
+        else if (orientacao == 2)
+        { // Diagonal descendente (\)
+            linha_verificar = linha + i;
+            coluna_verificar = coluna + i;
+        }
+        else if (orientacao == 3)
+        { // Diagonal ascendente (/)
+            linha_verificar = linha + i;
+            coluna_verificar = coluna - i;
+        }
+        else
+        {
+            return true; // Orientação inválida = considera sobreposição
         }
 
         // Se já há um navio nesta posição, há sobreposição
@@ -101,9 +129,17 @@ bool posicionarNavio(int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO],
     {
         printf("Orientação: Horizontal\n");
     }
-    else
+    else if (orientacao == 1)
     {
         printf("Orientação: Vertical\n");
+    }
+    else if (orientacao == 2)
+    {
+        printf("Orientação: Diagonal descendente (\\)\n");
+    }
+    else if (orientacao == 3)
+    {
+        printf("Orientação: Diagonal ascendente (/)\n");
     }
 
     // Validar coordenadas
@@ -133,9 +169,17 @@ bool posicionarNavio(int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO],
         { // Horizontal
             tabuleiro[linha_inicial][coluna_inicial + i] = navio[i];
         }
-        else
+        else if (orientacao == 1)
         { // Vertical
             tabuleiro[linha_inicial + i][coluna_inicial] = navio[i];
+        }
+        else if (orientacao == 2)
+        { // Diagonal descendente (\)
+            tabuleiro[linha_inicial + i][coluna_inicial + i] = navio[i];
+        }
+        else if (orientacao == 3)
+        { // Diagonal ascendente (/)
+            tabuleiro[linha_inicial + i][coluna_inicial - i] = navio[i];
         }
     }
 
@@ -215,45 +259,71 @@ int main()
     // Declaração da matriz do tabuleiro 10x10
     int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
 
-    // Declaração dos vetores para representar os navios
+    // Declaração dos vetores para representar os quatro navios
     int navio1[TAMANHO_NAVIO]; // Primeiro navio (horizontal)
     int navio2[TAMANHO_NAVIO]; // Segundo navio (vertical)
+    int navio3[TAMANHO_NAVIO]; // Terceiro navio (diagonal descendente)
+    int navio4[TAMANHO_NAVIO]; // Quarto navio (diagonal ascendente)
 
-    printf("=== PROGRAMA BATALHA NAVAL - NÍVEL NOVATO ===\n\n");
+    printf("=== PROGRAMA BATALHA NAVAL - NÍVEL INTERMEDIÁRIO ===\n\n");
 
     // Passo 1: Inicializar o tabuleiro com água
     inicializarTabuleiro(tabuleiro);
 
-    // Passo 2: Definir coordenadas dos navios (definidas diretamente no código)
+    // Passo 2: Definir coordenadas dos quatro navios (definidas diretamente no código)
+    
     // Coordenadas do primeiro navio (horizontal)
-    int linha1 = 2;      // Linha inicial do navio 1
-    int coluna1 = 1;     // Coluna inicial do navio 1
+    int linha1 = 1;      // Linha inicial do navio 1
+    int coluna1 = 2;     // Coluna inicial do navio 1
     int orientacao1 = 0; // 0 = Horizontal
 
     // Coordenadas do segundo navio (vertical)
-    int linha2 = 5;      // Linha inicial do navio 2
+    int linha2 = 4;      // Linha inicial do navio 2
     int coluna2 = 7;     // Coluna inicial do navio 2
     int orientacao2 = 1; // 1 = Vertical
 
-    printf("\nCoordenadas definidas:\n");
-    printf("Navio 1: Posição (%d, %d) - Horizontal\n", linha1, coluna1);
-    printf("Navio 2: Posição (%d, %d) - Vertical\n\n", linha2, coluna2);
+    // Coordenadas do terceiro navio (diagonal descendente \)
+    int linha3 = 0;      // Linha inicial do navio 3
+    int coluna3 = 0;     // Coluna inicial do navio 3
+    int orientacao3 = 2; // 2 = Diagonal descendente
 
-    // Passo 3: Posicionar os navios no tabuleiro
+    // Coordenadas do quarto navio (diagonal ascendente /)
+    int linha4 = 6;      // Linha inicial do navio 4
+    int coluna4 = 9;     // Coluna inicial do navio 4
+    int orientacao4 = 3; // 3 = Diagonal ascendente
+
+    printf("\nCoordenadas definidas para os 4 navios:\n");
+    printf("Navio 1: Posição (%d, %d) - Horizontal\n", linha1, coluna1);
+    printf("Navio 2: Posição (%d, %d) - Vertical\n", linha2, coluna2);
+    printf("Navio 3: Posição (%d, %d) - Diagonal descendente (\\)\n", linha3, coluna3);
+    printf("Navio 4: Posição (%d, %d) - Diagonal ascendente (/)\n\n", linha4, coluna4);
+
+    // Passo 3: Posicionar os quatro navios no tabuleiro
     bool navio1_posicionado = posicionarNavio(tabuleiro, navio1, linha1, coluna1,
                                               orientacao1, 1);
 
     bool navio2_posicionado = posicionarNavio(tabuleiro, navio2, linha2, coluna2,
                                               orientacao2, 2);
 
-    // Verificar se ambos os navios foram posicionados com sucesso
-    if (navio1_posicionado && navio2_posicionado)
+    bool navio3_posicionado = posicionarNavio(tabuleiro, navio3, linha3, coluna3,
+                                              orientacao3, 3);
+
+    bool navio4_posicionado = posicionarNavio(tabuleiro, navio4, linha4, coluna4,
+                                              orientacao4, 4);
+
+    // Verificar se todos os navios foram posicionados com sucesso
+    if (navio1_posicionado && navio2_posicionado && navio3_posicionado && navio4_posicionado)
     {
-        printf("\nTodos os navios foram posicionados com sucesso!\n");
+        printf("\nTodos os 4 navios foram posicionados com sucesso!\n");
     }
     else
     {
         printf("\nERRO: Nem todos os navios puderam ser posicionados!\n");
+        printf("Status dos navios:\n");
+        printf("Navio 1 (Horizontal): %s\n", navio1_posicionado ? "✓ Sucesso" : "✗ Falhou");
+        printf("Navio 2 (Vertical): %s\n", navio2_posicionado ? "✓ Sucesso" : "✗ Falhou");
+        printf("Navio 3 (Diagonal \\): %s\n", navio3_posicionado ? "✓ Sucesso" : "✗ Falhou");
+        printf("Navio 4 (Diagonal /): %s\n", navio4_posicionado ? "✓ Sucesso" : "✗ Falhou");
         return 1; // Encerrar programa com código de erro
     }
 
@@ -264,5 +334,7 @@ int main()
     exibirEstatisticas(tabuleiro);
 
     printf("\nPrograma executado com sucesso!\n");
+    printf("Total de navios posicionados: 4\n");
+    printf("Orientações utilizadas: Horizontal, Vertical, Diagonal descendente, Diagonal ascendente\n");
     return 0; // Retorno de sucesso
 }
